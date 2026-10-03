@@ -91,6 +91,7 @@ def _cmd_extract(args: argparse.Namespace) -> int:
         policy_id=args.policy_id,
         document_text=text,
         max_retries=args.max_retries,
+        model="claude-haiku-4-5-20251001",
     )
     print(json.dumps(_serialize_outcome(outcome), indent=2, sort_keys=True))
     return 0 if isinstance(outcome, PolicyExtraction) else 1
@@ -114,6 +115,7 @@ def _cmd_batch(args: argparse.Namespace) -> int:
             extractor_client=extractor_client,
             policies=policies,
             sample_size=args.dry_run_sample,
+            model="claude-haiku-4-5-20251001",
         )
         _print_sample(sample)
         if not args.force and sample.first_pass_success_rate < args.sample_threshold:
@@ -129,6 +131,7 @@ def _cmd_batch(args: argparse.Namespace) -> int:
         batch_client=batch_client,
         extractor_client=extractor_client,
         policies=policies,
+        model="claude-haiku-4-5-20251001",
     )
     print(json.dumps({pid: _serialize_outcome(o) for pid, o in results.items()}, indent=2))
     return 0
@@ -143,6 +146,7 @@ def _cmd_pipeline(args: argparse.Namespace) -> int:
     for pid, doc in policies:
         outcome = extract_with_retry(
             client=extractor_client, policy_id=pid, document_text=doc, max_retries=3,
+            model="claude-haiku-4-5-20251001",
         )
         outcomes.append(outcome)
         if isinstance(outcome, RetryFutileEscalation):
@@ -150,6 +154,7 @@ def _cmd_pipeline(args: argparse.Namespace) -> int:
         review = independent_review(
             client=extractor_client,
             source_document=doc,
+            model="claude-sonnet-4-6",
             extracted_record={
                 "policy_id": outcome.policy_id,
                 "policy_type": outcome.policy_type,

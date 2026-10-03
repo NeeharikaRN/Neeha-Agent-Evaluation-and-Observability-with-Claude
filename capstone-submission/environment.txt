@@ -1,0 +1,2 @@
+Python 3.13.0
+OS: Linux a94edec921cb1686f2b307c5975df7c78c417827-74575c79f6-bg9lg 6.6.97+ #1 SMP Fri Aug 22 11:53:37 UTC 2025 x86_64 GNU/Linux
