@@ -1,2 +1,26 @@
 Python 3.13.0
 OS: Linux a94edec921cb1686f2b307c5975df7c78c417827-74575c79f6-bg9lg 6.6.97+ #1 SMP Fri Aug 22 11:53:37 UTC 2025 x86_64 GNU/Linux
+Date run: 2026-10-03
+
+Setup notes:
+- Vocareum workspace (claude.vocareum.com as ANTHROPIC_BASE_URL), ANTHROPIC_API_KEY set.
+- Each project installed in its own venv via:
+    python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+- All three test suites, both static checks (mypy/ruff), and all offline runs (--mode replay,
+  --offline) executed with no further changes to source files.
+- Live calls made: System 1's end-to-end `pipeline` run, System 1's live test suite
+  (test_live_extracts_well_formed_policy, test_live_dry_run_sample_against_real_api), and
+  System 1 + System 2's perturbation runs. System 3 ran entirely offline per the course's
+  offline-first instructions for the supply-chain investigator.
+- Model-id fix: the Vocareum proxy does not resolve the undated alias "claude-haiku-4-5"; it
+  requires the dated id "claude-haiku-4-5-20251001" (confirmed via `client.models.list()`).
+  No library defaults were changed (the policy-pipeline's offline tests assert the literal
+  default constant "claude-haiku-4-5", so DEFAULT_EXTRACTOR_MODEL / DEFAULT_REVIEWER_MODEL were
+  left untouched). Instead, the dated model id was passed explicitly:
+    - policy_extractor/__main__.py: added `model="claude-haiku-4-5-20251001"` (extractor calls)
+      and `model="claude-sonnet-4-6"` (reviewer call) at the 5 CLI call sites — no test exercises
+      __main__.py directly, so this didn't affect any test outcome.
+    - mortgage_extractor: used the CLI's existing `--model claude-haiku-4-5-20251001` flag;
+      no source edits needed.
+  No application logic was changed in either project, only the model identifier used for live
+  API calls.
